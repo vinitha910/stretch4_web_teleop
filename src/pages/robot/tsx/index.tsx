@@ -51,6 +51,7 @@ export const robot = new Robot({
     leaseStatusCallback: forwardLeaseStatus,
     jointVelocityLimitsCallback: forwardJointVelocityLimits,
     wheelOdomCallback: forwardWheelOdom,
+    cmdVelStoppedCallback: forwardCmdVelStopped,
 });
 
 export let connection: WebRTCConnection;
@@ -228,6 +229,14 @@ function forwardWheelOdom(yaw: number) {
         type: "wheelOdom",
         yaw: yaw,
     } as WheelOdomMessage);
+}
+
+function forwardCmdVelStopped() {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "cmdVelStopped",
+    });
 }
 
 function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {

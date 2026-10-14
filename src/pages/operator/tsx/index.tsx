@@ -302,6 +302,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
         case "wheelOdom":
             remoteRobot.setWheelOdomYaw((message as WheelOdomMessage).yaw);
             break;
+        case "cmdVelStopped":
+            buttonFunctionProvider.handleCmdVelStopped();
+            break;
         case "odom":
             remoteRobot.sensors.setOdom(message.message);
             break;
@@ -361,7 +364,8 @@ function configureRemoteRobot() {
     remoteRobot.sensors.setLeaseStatusFunctionProviderCallback(
         (holder, isDriverHolding) => {
             if (!isDriverHolding) {
-                buttonFunctionProvider.stopCurrentAction(true);
+                buttonFunctionProvider.disableActiveButton();
+                // buttonFunctionProvider.stopCurrentAction(true);
             }
         }
     );
