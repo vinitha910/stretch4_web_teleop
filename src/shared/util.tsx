@@ -102,7 +102,12 @@ export type WebRTCMessage =
     | SeedLocalizationStateMessage
     | JointVelocityLimitsMessage
     | WheelOdomMessage
+    | CmdVelStoppedMessage
     | cmd;
+
+export interface CmdVelStoppedMessage {
+    type: "cmdVelStopped";
+}
 
 interface StopTrajectoryMessage {
     type: "stopTrajectory";

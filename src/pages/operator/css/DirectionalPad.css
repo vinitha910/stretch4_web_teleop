@@ -568,3 +568,39 @@ button.Arm.\+.Gripper.button-turn img {
 }
 
 /* END Button turn*/
+
+/* START Rotate magic pad */
+
+.rotate-magic-pad {
+    position: relative;
+    top: calc(var(--size) * -1.5);
+    left: 0px;
+    width: var(--size);
+    height: var(--size);
+    margin: 0 auto;
+    border-radius: 50%;
+    background-color: hsla(0, 0%, 0%, 0.3);
+    opacity: 0;
+}
+
+.rotate-magic-pad:hover {
+    opacity: 1;
+}
+
+.rotate-magic-pad-arrow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    color: hsl(204deg 100% 97%);
+}
+
+.rotate-magic-pad-arrow-line {
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+}
+
+/* END Rotate magic pad */

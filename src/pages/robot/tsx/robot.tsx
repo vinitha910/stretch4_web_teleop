@@ -41,6 +41,11 @@ import {
 export var robotMode: "navigation" | "position" | "velocity" | "unknown" = "position";
 export var rosConnected = false;
 
+interface ROSTwist extends Message {
+    linear: { x: number; y: number; z: number };
+    angular: { x: number; y: number; z: number };
+}
+
 // Constants for movement states
 export enum MovementState {
     Executing = "movement executing!",
@@ -125,7 +130,7 @@ export class Robot extends React.Component {
     /** Drive with obstacle stopping: collision_monitor forwards this to /cmd_vel. */
     private cmdVelNavTopic?: Topic;
     /** Drive straight to the driver; used only while collision_monitor is not active. */
-    private cmdVelDirectTopic?: Topic;
+    private cmdVelDirectTopic?: Topic<ROSTwist>;
     private collisionMonitorStateService?: Service;
     private collisionMonitorActive = false;
     private collisionMonitorPollTimerID?: ReturnType<typeof setInterval>;
@@ -159,6 +164,7 @@ export class Robot extends React.Component {
     private stretchToolCallback: (value: string) => void;
     private leaseStatusCallback: (holder: string, isDriverHolding: boolean) => void;
     private jointVelocityLimitsCallback: (limits: JointVelocityLimits) => void;
+    private cmdVelStoppedCallback: () => void;
     private subscriptions: Topic[] = [];
     private stretchToolParam?: Param;
     private toolIsActuatedParam?: Param;
@@ -189,6 +195,7 @@ export class Robot extends React.Component {
         stretchToolCallback: (value: string) => void;
         leaseStatusCallback: (holder: string, isDriverHolding: boolean) => void;
         jointVelocityLimitsCallback: (limits: JointVelocityLimits) => void;
+        cmdVelStoppedCallback: () => void;
         wheelOdomCallback?: (yaw: number) => void;
     }) {
         super(props);
@@ -216,6 +223,7 @@ export class Robot extends React.Component {
         this.stretchToolCallback = props.stretchToolCallback;
         this.leaseStatusCallback = props.leaseStatusCallback;
         this.jointVelocityLimitsCallback = props.jointVelocityLimitsCallback;
+        this.cmdVelStoppedCallback = props.cmdVelStoppedCallback;
         this.wheelOdomCallback = props.wheelOdomCallback;
     }
 
@@ -362,6 +370,7 @@ export class Robot extends React.Component {
         );
 
         this.createCmdVelTopics();
+        this.subscribeToCmdVel();
         this.startCollisionMonitorPoll();
         this.createJointVelTopic();
         this.createEeCmdVelTopic();
@@ -948,7 +957,7 @@ export class Robot extends React.Component {
             name: "/cmd_vel_nav",
             messageType: "geometry_msgs/Twist",
         });
-        this.cmdVelDirectTopic = new Topic({
+        this.cmdVelDirectTopic = new Topic<ROSTwist>({
             ros: this.ros,
             name: "/cmd_vel",
             messageType: "geometry_msgs/Twist",
@@ -957,6 +966,29 @@ export class Robot extends React.Component {
             ros: this.ros,
             name: "/collision_monitor/get_state",
             serviceType: "lifecycle_msgs/srv/GetState",
+        });
+    }
+
+    private subscribeToCmdVel() {
+        if (!this.cmdVelDirectTopic) {
+            throw new Error(
+                "The /cmd_vel topic must be created before subscribing."
+            );
+        }
+
+        this.subscriptions.push(this.cmdVelDirectTopic);
+        this.cmdVelDirectTopic.subscribe((msg) => {
+            const { linear, angular } = msg;
+            if (
+                linear.x === 0 &&
+                linear.y === 0 &&
+                linear.z === 0 &&
+                angular.x === 0 &&
+                angular.y === 0 &&
+                angular.z === 0
+            ) {
+                this.cmdVelStoppedCallback();
+            }
         });
     }
 

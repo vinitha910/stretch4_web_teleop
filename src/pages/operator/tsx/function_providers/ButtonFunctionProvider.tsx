@@ -233,6 +233,16 @@ export class ButtonFunctionProvider extends FunctionProvider {
         this.setButtonInactiveState(this.activeButtonPadFunction);
     }
 
+    public handleCmdVelStopped() {
+        this.stopCurrentAction();
+        this.buttonStateMap.forEach((state, button) => {
+            if (state === ButtonState.Active) {
+                this.setButtonInactiveState(button);
+            }
+        });
+        this.activeButtonPadFunction = undefined;
+    }
+
     /**
      * Simulates press-and-hold on a ButtonPad for durationMs.
      * Also, VC automatically sets ActionMode to PressAndHold.
