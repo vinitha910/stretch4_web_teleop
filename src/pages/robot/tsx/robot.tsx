@@ -169,6 +169,7 @@ export class Robot extends React.Component {
     private toolIsActuated: boolean = true;
     private stretchParamsReady: Promise<void> = Promise.resolve();
     private jointVelocityLimits: JointVelocityLimits = {};
+    private wheelOdomCallback?: (yaw: number) => void;
 
     constructor(props: {
         jointStateCallback: (
@@ -188,6 +189,7 @@ export class Robot extends React.Component {
         stretchToolCallback: (value: string) => void;
         leaseStatusCallback: (holder: string, isDriverHolding: boolean) => void;
         jointVelocityLimitsCallback: (limits: JointVelocityLimits) => void;
+        wheelOdomCallback?: (yaw: number) => void;
     }) {
         super(props);
         this.jointStateCallback = props.jointStateCallback;
@@ -214,6 +216,7 @@ export class Robot extends React.Component {
         this.stretchToolCallback = props.stretchToolCallback;
         this.leaseStatusCallback = props.leaseStatusCallback;
         this.jointVelocityLimitsCallback = props.jointVelocityLimitsCallback;
+        this.wheelOdomCallback = props.wheelOdomCallback;
     }
 
     setOnRosConnectCallback(callback: () => Promise<void>) {
@@ -376,6 +379,7 @@ export class Robot extends React.Component {
         this.createHomeTheRobotService();
         this.createSeedLocalizationService();
         this.initStretchParams();
+        if (this.wheelOdomCallback) this.subscribeToWheelOdom(this.wheelOdomCallback);
 
         return Promise.resolve();
     }
@@ -565,6 +569,30 @@ export class Robot extends React.Component {
         });
     }
 
+    /**
+     * Subscribes to /wheel_odom and extracts the yaw angle from the orientation
+     * quaternion, forwarding it to the provided callback.
+     */
+    subscribeToWheelOdom(callback: (yaw: number) => void) {
+        const topic: Topic = new Topic({
+            ros: this.ros,
+            name: "/wheel_odom",
+            messageType: "nav_msgs/msg/Odometry",
+        });
+        this.subscriptions.push(topic);
+
+        topic.subscribe((msg: any) => {
+            const { x: qx, y: qy, z: qz, w: qw } =
+                msg.pose.pose.orientation;
+            // Standard quaternion-to-yaw formula for a planar robot.
+            const yaw = Math.atan2(
+                2 * (qw * qz + qx * qy),
+                1 - 2 * (qy * qy + qz * qz)
+            );
+            callback(yaw);
+        });
+    }
+    
     subscribeToVideo(props: VideoProps) {
         let topic: Topic<ROSCompressedImage> = new Topic({
             ros: this.ros,

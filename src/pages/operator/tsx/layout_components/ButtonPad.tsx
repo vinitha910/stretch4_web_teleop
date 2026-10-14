@@ -64,8 +64,8 @@ const notHomedDisabledFunctions = new Set<ButtonPadButton>([
     ButtonPadButton.GripperClose,
 ]);
 
-/** Helper function to get the appropriate rotate icon based on pilot controls and direction */
-const getRotateIcon = (
+/** Helper function for the 2 buttons in Arm + Gripper and Wrist ButtonPads*/
+const getCenterButtonsIcons = (
     pilotControlsCurrent: string,
     direction: string
 ): string => {
@@ -168,10 +168,10 @@ export const ButtonPad = (props: ButtonPadProps): React.JSX.Element => {
                     return definition.id === ButtonPadIdMobile.OmniDrive
                         ? B.StrafeRight
                         : B.BaseReverse; // Fallback for Drive (shouldn't happen)
-                case "rotate-left":
-                    return B.BaseRotateLeft;
-                case "rotate-right":
-                    return B.BaseRotateRight;
+                // case "rotate-left":
+                //     return B.BaseRotateLeft;
+                // case "rotate-right":
+                //     return B.BaseRotateRight;
                 default:
                     return functions[0]; // Fallback
             }
@@ -233,10 +233,10 @@ export const ButtonPad = (props: ButtonPadProps): React.JSX.Element => {
                     return definition.id === ButtonPadIdMobile.OmniDrive
                         ? B.StrafeRight
                         : B.BaseReverse;
-                case "rotate-left":
-                    return B.BaseRotateLeft;
-                case "rotate-right":
-                    return B.BaseRotateRight;
+                // case "rotate-left":
+                //     return B.BaseRotateLeft;
+                // case "rotate-right":
+                //     return B.BaseRotateRight;
                 default:
                     return functions[0]; // Fallback
             }
@@ -261,6 +261,7 @@ export const ButtonPad = (props: ButtonPadProps): React.JSX.Element => {
         return (
             <DirectionalPad
                 mapButtons={mapButtons}
+                isBaseDrive={pilotControlsCurrent === PilotButtonPadType.BaseDrive}
                 isCameraVeilVisible={props.isCameraVeilVisible}
             />
         );
@@ -342,10 +343,10 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                     return "Strafe left";
                 case "east":
                     return "Strafe right";
-                case "rotate-left":
-                    return "Turn left";
-                case "rotate-right":
-                    return "Turn right";
+                // case "rotate-left":
+                //     return "Turn left";
+                // case "rotate-right":
+                //     return "Turn right";
                 default:
                     console.warn(`Unknown direction: ${direction}`);
                     return "Unknown action";
@@ -402,10 +403,10 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                     return "Strafe left";
                 case "east":
                     return "Strafe right";
-                case "rotate-left":
-                    return "Turn left";
-                case "rotate-right":
-                    return "Turn right";
+                // case "rotate-left":
+                //     return "Turn left";
+                // case "rotate-right":
+                //     return "Turn right";
                 default:
                     console.warn(`Unknown direction: ${direction}`);
                     return "Unknown action";
@@ -417,7 +418,8 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
     const isArmGripperButtons = pilotControlsCurrent === PilotButtonPadType.ArmGripper;
     const isWristButtons = pilotControlsCurrent === PilotButtonPadType.Wrist;
     const isChevronButtons = !isArmGripperButtons && !isWristButtons && cardinalDirections.includes(props.direction);
-    const isRotate = rotateDirections.includes(props.direction);
+    // const isRotate = rotateDirections.includes(props.direction);
+    const isCenterTwoButtons = rotateDirections.includes(props.direction);
     const armGripperIconCalc = (direction: string): string => {
         switch (direction) {
             case "north":
@@ -449,7 +451,7 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
     }
 
     // Base drive
-    if (isRotate) {
+    if (isCenterTwoButtons) {
         return (
             <div
                 className={`button-turn-wrapper ${props.direction} ${buttonState}`}
@@ -468,7 +470,7 @@ const DirectionalButton = (props: DirectionalButtonProps) => {
                     {...clickProps}
                 >
                     <img
-                        src={getRotateIcon(pilotControlsCurrent, props.direction)}
+                        src={getCenterButtonsIcons(pilotControlsCurrent, props.direction)}
                         alt=""
                         className="turn-icon"
                         aria-hidden="true"
@@ -700,8 +702,8 @@ function getShapeAndFunctionsFromId(
             functions = [
                 B.BaseForward,
                 B.BaseReverse,
-                B.BaseRotateLeft,
-                B.BaseRotateRight,
+                // B.BaseRotateLeft,
+                // B.BaseRotateRight,
             ];
             shape = ButtonPadShape.SimpleButtonPad;
             break;
@@ -726,8 +728,8 @@ function getShapeAndFunctionsFromId(
             functions = [
                 B.BaseForward,
                 B.BaseReverse,
-                B.BaseRotateLeft,
-                B.BaseRotateRight,
+                // B.BaseRotateLeft,
+                // B.BaseRotateRight,
             ];
             shape = ButtonPadShape.RowButtonPad;
             break;
@@ -737,10 +739,10 @@ function getShapeAndFunctionsFromId(
                 B.OmniBackward,
                 B.StrafeLeft,
                 B.StrafeRight,
-                B.BaseRotateLeft,
-                B.BaseRotateRight,
+                // B.BaseRotateLeft,
+                // B.BaseRotateRight,
             ];
-            shape = ButtonPadShape.GripperLift; // To Do: temp to remove error
+            shape = ButtonPadShape.Directional; // To Do: temp to remove error
             break;
         default:
             throw new Error(`unknow button pad id: ${id}`);

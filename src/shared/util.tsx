@@ -101,6 +101,7 @@ export type WebRTCMessage =
     | ActionStateMessage
     | SeedLocalizationStateMessage
     | JointVelocityLimitsMessage
+    | WheelOdomMessage
     | cmd;
 
 interface StopTrajectoryMessage {
@@ -189,6 +190,13 @@ export interface MapPoseMessage {
 export interface BatteryVoltageMessage {
     type: "batteryVoltage";
     message: number;
+}
+
+/** Yaw extracted from nav_msgs/Odometry on /wheel_odom, forwarded to the operator. */
+export interface WheelOdomMessage {
+    type: "wheelOdom";
+    /** Current yaw in radians, extracted from pose.pose.orientation quaternion. */
+    yaw: number;
 }
 
 export interface OdomMessage {

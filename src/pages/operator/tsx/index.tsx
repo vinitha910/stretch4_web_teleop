@@ -11,7 +11,8 @@ import {
     ToolMetadata,
     updateJointVelocities,
     waitUntil,
-    WebRTCMessage
+    WebRTCMessage,
+    WheelOdomMessage
 } from "shared/util";
 import { WebRTCConnection } from "shared/webrtcconnections";
 import { ButtonFunctionProvider } from "./function_providers/ButtonFunctionProvider";
@@ -297,6 +298,9 @@ function handleWebRTCMessage(message: WebRTCMessage | WebRTCMessage[]) {
             break;
         case "batteryVoltage":
             remoteRobot.sensors.setBatteryVoltage(message.message);
+            break;
+        case "wheelOdom":
+            remoteRobot.setWheelOdomYaw((message as WheelOdomMessage).yaw);
             break;
         case "odom":
             remoteRobot.sensors.setOdom(message.message);

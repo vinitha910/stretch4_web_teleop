@@ -38,6 +38,8 @@ export class RemoteRobot extends React.Component<{}, any> {
     moveBaseGoalReached: boolean;
     moveBaseState?: string;
     private mapPoseListeners: Set<(pose: Transform) => void> = new Set();
+    private wheelOdomYaw: number = 0;
+    private wheelOdomYawCallback?: (yaw: number) => void;
 
     constructor(props: { robotChannel: robotMessageChannel }) {
         super(props);
@@ -59,6 +61,28 @@ export class RemoteRobot extends React.Component<{}, any> {
             } as Quaternion,
         } as Transform;
         this.moveBaseGoalReached = false;
+    }
+
+     /** Returns the most recently received wheel odometry yaw (radians, (-π, π]). */
+    getWheelOdomYaw(): number {
+        return this.wheelOdomYaw;
+    }
+
+    /**
+     * Called by the operator index when a "wheelOdom" WebRTC message arrives.
+     * Stores the yaw and fires the registered monitoring callback (if any).
+     */
+    setWheelOdomYaw(yaw: number) {
+        this.wheelOdomYaw = yaw;
+        if (this.wheelOdomYawCallback) this.wheelOdomYawCallback(yaw);
+    }
+
+    /**
+     * Registers a one-shot or persistent listener for yaw updates.
+     * Pass undefined to clear.
+     */
+    setWheelOdomYawCallback(callback: ((yaw: number) => void) | undefined) {
+        this.wheelOdomYawCallback = callback;
     }
 
     setGoalReached(reached: boolean) {

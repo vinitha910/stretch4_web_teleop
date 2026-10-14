@@ -1,5 +1,6 @@
 import {
     JOINT_INCREMENTS,
+    JOINT_VELOCITIES,
     ValidJoints,
     ValidJointStateDict,
 } from "shared/util";
@@ -18,6 +19,7 @@ export enum ButtonPadButton {
     StrafeRight = "Strafe Right",
     BaseForward = "Base Forward",
     BaseReverse = "Base Reverse",
+    BaseRotate = "Base Rotate",
     BaseRotateRight = "Base rotate right",
     BaseRotateLeft = "Base rotate left",
     ArmLift = "Arm lift",
@@ -81,6 +83,9 @@ export class ButtonFunctionProvider extends FunctionProvider {
      */
     private operatorCallback?: (buttonStateMap: ButtonStateMap) => void =
         undefined;
+
+    /** Callback into DirectionalPad's arrowRad state setter. */
+    private arrowRadCallback?: (rad: number | null) => void;
 
     constructor() {
         super();
@@ -176,6 +181,14 @@ export class ButtonFunctionProvider extends FunctionProvider {
     }
 
     /**
+     * Registers the DirectionalPad's arrowRad state setter so executeBaseRotate
+     * can animate the arrow as the robot moves.
+     */
+    setArrowRadCallback(cb: ((rad: number | null) => void) | undefined) {
+        this.arrowRadCallback = cb;
+    }
+
+    /**
      * Sets a type of a button pad button to active.
      *
      * @param buttonType the button pad button to set active
@@ -259,7 +272,8 @@ export class ButtonFunctionProvider extends FunctionProvider {
      * @returns the {@link ButtonFunctions} for the button
      */
     public provideFunctions(
-        buttonPadFunction: ButtonPadButton
+        buttonPadFunction: ButtonPadButton,
+        angleRad?: number
     ): ButtonFunctions {
         let action: () => void;
         const onLeave = () => {
@@ -287,6 +301,21 @@ export class ButtonFunctionProvider extends FunctionProvider {
         const increment =
             multiplier * jointIncrement * FunctionProvider.velocityScale;
 
+        // BaseRotate uses odometry feedback — handled separately so the
+        // 1-second StepActions timeout never fires and interrupts the move.
+        // NOTE: intentionally does NOT call setButtonActiveState because that
+        // triggers a MobileOperator re-render which remounts DirectionalPad,
+        // resetting arrowRad to null and hiding the arrow overlay.
+        if (buttonPadFunction === ButtonPadButton.BaseRotate) {
+            return {
+                onClick: () => {
+                    if (angleRad !== undefined) {
+                        this.executeBaseRotate(angleRad);
+                    }
+                },
+            };
+        }
+        
         switch (FunctionProvider.actionMode) {
             case ActionModeType.StepActions:
                 switch (buttonPadFunction) {
@@ -432,6 +461,72 @@ export class ButtonFunctionProvider extends FunctionProvider {
                     };
         }
     }
+
+    /**
+     * Rotates the mobile base by exactly targetRad radians, using /wheel_odom
+     * odometry feedback to stop within STOP_THRESHOLD of the target.
+     *
+     * Delta-yaw accumulation handles yaw wrap-around correctly.
+     * Positive targetRad = CCW (ROS convention); negative = CW.
+     */
+    private executeBaseRotate(targetRad: number) {
+        const STOP_THRESHOLD = 0.05; // ~3 degrees
+        const ANG_VEL =
+            JOINT_VELOCITIES["rotate_mobile_base"]! *
+            FunctionProvider.velocityScale;
+
+        // Clear any stale monitoring from a prior rotation.
+        FunctionProvider.remoteRobot?.setWheelOdomYawCallback(undefined);
+
+        if (Math.abs(targetRad) < STOP_THRESHOLD) return;
+
+        // Negate: atan2(dx,-dy) click-right = +rad, but ROS +angVel = CCW.
+        // So click-right must produce CW rotation = negative angVel.
+        const angVel = targetRad >= 0 ? -ANG_VEL : ANG_VEL;
+
+        // Snapshot starting yaw.
+        let lastYaw = FunctionProvider.remoteRobot?.getWheelOdomYaw() ?? 0;
+        let accumRad = 0;
+
+        // Starts a 25 ms heartbeat that keeps sending the velocity command.
+        this.setBaseVelocity(0, 0, angVel);
+
+        // Monitor every /wheel_odom update and stop when target is reached.
+        FunctionProvider.remoteRobot?.setWheelOdomYawCallback(
+            (currentYaw: number) => {
+                let delta = currentYaw - lastYaw;
+                // Normalise to (-π, π] to survive yaw wrap-around at ±π.
+                while (delta > Math.PI) delta -= 2 * Math.PI;
+                while (delta < -Math.PI) delta += 2 * Math.PI;
+                accumRad += delta;
+                lastYaw = currentYaw;
+
+                // remaining = how much the user-space angle still needs to rotate.
+                // targetRad + accumRad → starts at targetRad, approaches 0.
+                const remaining = targetRad + accumRad;
+                this.arrowRadCallback?.(remaining);
+
+                // accumRad goes in the -sign(targetRad) direction (opposite
+                // of user angle, because of the ROS CCW+ convention).
+                if (
+                    -Math.sign(targetRad) * accumRad >=
+                    Math.abs(targetRad) - STOP_THRESHOLD
+                ) {
+                    this.stopCurrentAction(true);
+                    FunctionProvider.remoteRobot?.setWheelOdomYawCallback(
+                        undefined
+                    );
+                    // Hide the arrow now that rotation is complete.
+                    this.arrowRadCallback?.(null);
+                    console.log(
+                        `BaseRotate done: target=${targetRad.toFixed(3)} rad,` +
+                        ` actual=${accumRad.toFixed(3)} rad`
+                    );
+                    this.setButtonInactiveState(ButtonPadButton.BaseRotate);
+                }
+            }
+        );
+    }
 }
 
 /**
@@ -496,7 +591,8 @@ function getJointNameFromButtonFunction(
         case ButtonPadButton.BaseReverse:
         case ButtonPadButton.BaseForward:
             return "translate_mobile_base";
-
+        
+        case ButtonPadButton.BaseRotate:
         case ButtonPadButton.BaseRotateLeft:
         case ButtonPadButton.BaseRotateRight:
             return "rotate_mobile_base";

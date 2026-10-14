@@ -26,6 +26,7 @@ import {
     ValidJointStateDict,
     ValidJointStateMessage,
     WebRTCMessage,
+    WheelOdomMessage,
 } from "shared/util";
 import { StretchToolMessage } from "../../../shared/util";
 import { WebRTCConnection } from "../../../shared/webrtcconnections";
@@ -49,6 +50,7 @@ export const robot = new Robot({
     stretchToolCallback: forwardStretchTool,
     leaseStatusCallback: forwardLeaseStatus,
     jointVelocityLimitsCallback: forwardJointVelocityLimits,
+    wheelOdomCallback: forwardWheelOdom,
 });
 
 export let connection: WebRTCConnection;
@@ -217,6 +219,15 @@ function forwardOdom(odom: ROSOdometry) {
         type: "odom",
         message: odom,
     } as OdomMessage);
+}
+
+function forwardWheelOdom(yaw: number) {
+    if (!connection) throw "WebRTC connection undefined!";
+
+    connection.sendData({
+        type: "wheelOdom",
+        yaw: yaw,
+    } as WheelOdomMessage);
 }
 
 function forwardOccupancyGrid(occupancyGrid: ROSOccupancyGrid) {
