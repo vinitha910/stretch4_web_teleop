@@ -7,6 +7,8 @@ import {
 import { ActionMode } from "../static_components/ActionMode";
 import { CameraSwitcher } from "../static_components/CameraSwitcher";
 import "operator/css/FooterPilotMode.css";
+import { PilotControlsToggle } from "../static_components/PilotControlsToggle";
+import { MovementRecorder } from "./MovementRecorder";
 
 interface FooterControlsProps {
     cameraID: CameraViewId;
@@ -27,10 +29,16 @@ const FooterHeadCam: React.FC<FooterControlsProps> = ({
     setCameraID,
     actionSpeedCurrent,
     onActionSpeedChange,
+    onPilotControlsChange,
+    pilotControlsCurrent,
     actionModeCurrent,
+    isFlyingGripper,
     onActionModeChange,
     isCameraVeilVisibleSet,
     isCameraVeilVisible,
+    sharedState,
+    isRecording,
+    isRecordingSet,
 }) => {
     return (
         <div className="footer-pilot-mode">
@@ -41,13 +49,25 @@ const FooterHeadCam: React.FC<FooterControlsProps> = ({
                     isCameraVeilVisible={isCameraVeilVisible}
                     setCameraVeilCallback={isCameraVeilVisibleSet}
                 />
-                <ActionMode
+                {/* <ActionMode
                     mode={actionModeCurrent}
                     onChange={onActionModeChange}
                     isCameraVeilVisible={isCameraVeilVisible}
                     setCameraVeilCallback={isCameraVeilVisibleSet}
+                /> */}
+                <PilotControlsToggle
+                    onChange={onPilotControlsChange}
+                    isCameraVeilVisible={isCameraVeilVisible || isFlyingGripper}
+                    pilotControlsCurrent={pilotControlsCurrent}
                 />
-
+                <MovementRecorder
+                    sharedState={sharedState}
+                    isCameraVeilVisible={isCameraVeilVisible}
+                    setCameraVeilCallback={isCameraVeilVisibleSet}
+                    isRecording={isRecording}
+                    isRecordingSet={isRecordingSet}
+                    hideButton={isFlyingGripper}
+                />
                 <CameraSwitcher
                     isCameraVeilVisible={isCameraVeilVisible}
                     setCameraVeilCallback={isCameraVeilVisibleSet}

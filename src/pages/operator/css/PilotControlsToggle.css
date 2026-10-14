@@ -4,7 +4,7 @@
     z-index: 2;
     position: absolute;
     left: calc(50% - 1px);
-    bottom: 0px;
+    bottom: -12px;
     width: var(--scene-area-width);
     height: var(--scene-area-height);
     translate: -50% 0%;

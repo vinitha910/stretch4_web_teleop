@@ -152,22 +152,22 @@ const PilotMode: React.FC<PilotModeProps> = ({
                     )}
                 </AnimatePresence>
                 {/* Movement Recorder button <MovementRecordButton */}
-                <MovementRecorder
+                {/* <MovementRecorder
                     sharedState={sharedState}
                     isCameraVeilVisible={isCameraVeilVisible}
                     setCameraVeilCallback={isCameraVeilVisibleSet}
                     isRecording={isRecording}
                     isRecordingSet={isRecordingSet}
                     hideButton={isFlyingGripper}
-                />
+                /> */}
 
-                <PilotControlsToggle
+                {/* <PilotControlsToggle
                     onChange={setPilotControlsCurrent}
                     isCameraVeilVisible={isCameraVeilVisible || isFlyingGripper}
                     pilotControlsCurrent={
                         FunctionProvider.pilotControlsCurrent
                     }
-                />
+                /> */}
             </div>
             <FooterPilotMode
                 cameraID={cameraID}
@@ -175,9 +175,13 @@ const PilotMode: React.FC<PilotModeProps> = ({
                 // Action Speed
                 actionSpeedCurrent={FunctionProvider.velocityScale}
                 onActionSpeedChange={onVelocityScaleChange}
+                // Pilot Controls
+                onPilotControlsChange={setPilotControlsCurrent}
+                pilotControlsCurrent={FunctionProvider.pilotControlsCurrent}
                 // Action Mode
                 actionModeCurrent={FunctionProvider.actionMode}
                 onActionModeChange={setActionMode}
+                isFlyingGripper={isFlyingGripper}
                 // Camera Veil
                 isCameraVeilVisible={isCameraVeilVisible}
                 isCameraVeilVisibleSet={isCameraVeilVisibleSet}
@@ -186,6 +190,10 @@ const PilotMode: React.FC<PilotModeProps> = ({
                 // Scene Selection
                 sceneSelected={sceneSelected}
                 onSceneSelectedChange={onSceneSelectedChange}
+                // Recording
+                sharedState={sharedState}
+                isRecording={isRecording}
+                isRecordingSet={isRecordingSet}
             />
         </div >
     );

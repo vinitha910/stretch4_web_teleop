@@ -628,13 +628,13 @@ export const MobileOperator = (props: {
                         />
                     </div>
                 </SwipeableViews>
-                <FooterGlobal
+                {/* <FooterGlobal
                     swipeableViewsIdxSet={swipeableViewsIdxSet}
                     sceneSelected={sceneSelected}
                     onSceneSelectedChange={setSceneSelected}
                     isMainMenuOpen={isMainMenuOpen}
                     isMainMenuOpenSet={isMainMenuOpenSet}
-                />
+                /> */}
             </div>
         </div>
     );

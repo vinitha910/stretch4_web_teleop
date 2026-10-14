@@ -2,7 +2,7 @@
     z-index: 2;
     position: absolute;
     left: calc(50% - 1px);
-    bottom: 0px;
+    bottom: -25px;
     translate: -50% 0%;
     aspect-ratio: 9 / 16;
     pointer-events: none;
