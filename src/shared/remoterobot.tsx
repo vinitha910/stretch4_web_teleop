@@ -18,6 +18,7 @@ import {
     GetJointVelocity,
     SetJointVelocityCommand,
     SeedLocalizationCommand,
+    ToggleType,
 } from "shared/commands";
 import {
     ValidJointStateDict,
@@ -255,7 +256,7 @@ export class RemoteRobot extends React.Component<{}, any> {
 
 
     setToggle(
-        type: "setRunStop",
+        type: ToggleType,
         toggle: boolean
     ) {
         let cmd: ToggleCommand = {

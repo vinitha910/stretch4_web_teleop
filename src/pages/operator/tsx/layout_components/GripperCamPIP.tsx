@@ -8,6 +8,8 @@ import IconExpand from "operator/icons/IconExpand.svg";
 import IconCollapse from "operator/icons/IconCollapse.svg";
 
 import "../../css/GripperCamPIP.css";
+import { GripperCamPIPFuntions } from "../function_providers/GripperCamPIPFunctionProvider";
+import { gripperCamPIPFunctionProvider } from "..";
 
 /** Border radius lives in `style` so framer-motion can correct it mid-layout-animation. */
 const FRAME_BORDER_RADIUS_PX = 12;
@@ -96,7 +98,11 @@ const GripperCamPIP: React.FC<GripperCamPIPProps> = ({
                 </button>
                 <button
                     className="button-grippercampip-size-toggle"
-                    onPointerDown={() => isGripperCamLargeSet(!isGripperCamLarge)}
+                    // onPointerDown={() => isGripperCamLargeSet(!isGripperCamLarge)}
+                    onPointerDown={() => {
+                        isGripperCamLargeSet(!isGripperCamLarge)
+                        gripperCamPIPFunctionProvider.provideFunctions(GripperCamPIPFuntions.SetExpandedGripper)(!isGripperCamLarge);
+                    }}
                     disabled={!isGripperCamPIPViz || isFlyingGripper}
                     aria-label="Change size"
                 >

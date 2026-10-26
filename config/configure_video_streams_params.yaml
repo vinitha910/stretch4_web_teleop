@@ -81,5 +81,41 @@
                 { "y_min": 0, "y_max": 400, "x_min": 80, "x_max": 480 },
             "rotate": null,
         }
-    }
+    },
+    "expandedGripper": { "d405": {
+                    # The mask contain params to make a circular mask over the image.
+                    # For the mask the be circumscribed, its width/height must be:
+                    # ((480**2) + (270**2))**0.5
+                    # Pass "mask": null to not create mask
+                    "mask":
+                        {
+                            "width": 550,
+                            "height": 550,
+                            "radius": null,
+                            "center": null,
+                        },
+                    # The crop contain params to crop the image
+                    # x_max - x_min = mask_width and y_max - y_min = mask_height
+                    # Pass "crop": null to not crop image
+                    "crop":
+                        {
+                            "y_min": -140,
+                            "y_max": 410,
+                            "x_min": -35,
+                            "x_max": 515,
+                        },
+                    "rotate": null,
+                },
+                # 400 x 640
+                "oak": {
+                    # The mask contain params to make a circular mask over the image
+                    # Pass "mask": null to not create mask
+                    "mask": null,
+                    # The crop contain params to crop the image
+                    # x_max - x_min = mask_width and y_max - y_min = mask_height
+                    # Pass "crop": null to not crop image
+                    # No crop: [0, height, 0, width] = [0, 270, 0, 480]
+                    "crop": null,
+                    "rotate": null,
+                } },
 }

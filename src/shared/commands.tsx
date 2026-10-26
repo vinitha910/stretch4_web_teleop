@@ -80,8 +80,16 @@ export interface CameraPerspectiveCommand {
     perspective: "left" | "center" | "right";
 }
 
+export type ToggleType = 
+    "setFollowGripper"
+    | "setRealsenseDepthSensing"
+    | "setGripperDepthSensing"
+    | "setRealsenseBodyPoseEstimate"
+    | "setExpandedGripperCam"
+    | "setRunStop";
+
 export interface ToggleCommand {
-    type: "setRunStop";
+    type: ToggleType;
     toggle: boolean;
 }
 

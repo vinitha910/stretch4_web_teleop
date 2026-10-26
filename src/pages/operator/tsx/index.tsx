@@ -33,6 +33,7 @@ import { MovementRecorderFunctionProvider } from "./function_providers/MovementR
 import { RunStopFunctionProvider } from "./function_providers/RunStopFunctionProvider";
 import { UnderMapFunctionProvider } from "./function_providers/UnderMapFunctionProvider";
 import { MobileOperator } from "./MobileOperator";
+import { GripperCamPIPFunctionProvider } from "./function_providers/GripperCamPIPFunctionProvider";
 
 let allRemoteStreams: Map<string, RemoteStream> = new Map<
     string,
@@ -124,6 +125,7 @@ export var movementRecorderFunctionProvider: MovementRecorderFunctionProvider;
 export var homeTheRobotFunctionProvider: HomeTheRobotFunctionProvider =
     new HomeTheRobotFunctionProvider();
 export var cameraSwitcherFunctionProvider = new CameraSwitcherFunctionProvider();
+export var gripperCamPIPFunctionProvider = new GripperCamPIPFunctionProvider();
 
 // Create the WebRTC connection and connect the operator room
 connection = new WebRTCConnection({
