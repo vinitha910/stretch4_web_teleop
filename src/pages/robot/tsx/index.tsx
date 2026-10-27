@@ -373,7 +373,7 @@ function handleMessage(message: WebRTCMessage) {
         case "moveBase":
             robot.executeMoveBaseGoal(message.pose);
             break;
-        case "setExpandedGripper":
+        case "setExpandedGripperCam":
             robot.setExpandedGripper(message.toggle);
             break;
         case "setRunStop":
